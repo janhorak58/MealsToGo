@@ -14,8 +14,9 @@ import {
   RestaurantCardText,
   Icon,
 } from "./restaurant-info-card.styles";
+import { Favourite } from "../../../components/favourites/favourite.component";
 
-export const RestaurantInfoCard = ({ restaurant = {} }) => {
+export const RestaurantInfoCard = ({ restaurant = {}, small = false }) => {
   const {
     name = "Some Restaurant",
     icon = "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/lodging-71.png",
@@ -26,13 +27,18 @@ export const RestaurantInfoCard = ({ restaurant = {} }) => {
     isOpenNow = true,
     rating = 4,
     isClosedTemporarily = true,
+    placeId,
   } = restaurant;
 
   const ratingArray = Array.from(new Array(Math.floor(rating)));
+  for (let i = 0; i < ratingArray.length; i++) {
+    ratingArray[i] = { id: name + "_" + i.toString() };
+  }
 
   return (
     <RestaurantCard elevation={50}>
-      <RestaurantCardCover key={name} source={{ uri: photos[0] }} />
+      <Favourite restaurant={restaurant} />
+      {!small && <RestaurantCardCover key={name} source={{ uri: photos[0] }} />}
 
       <Info>
         <Row>
@@ -42,8 +48,13 @@ export const RestaurantInfoCard = ({ restaurant = {} }) => {
         <RestaurantCardContent>
           <Row>
             <Rating>
-              {ratingArray.map(() => (
-                <SvgXml xml={star} width={20} height={20} />
+              {ratingArray.map((_, i) => (
+                <SvgXml
+                  xml={star}
+                  width={20}
+                  height={20}
+                  key={`star-${placeId}-${i}`}
+                />
               ))}
             </Rating>
             {isClosedTemporarily && (

@@ -1,68 +1,54 @@
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useState, useEffect } from "react";
 import { ThemeProvider } from "styled-components/native";
-import { RestaurantsScreen } from "./src/features/restaurants/screens/restaurants.screen";
 import { theme } from "./src/infrastructure/theme";
 import {
   useFonts as useOsawld,
   Oswald_400Regular,
 } from "@expo-google-fonts/oswald";
 import { useFonts as useLato, Lato_400Regular } from "@expo-google-fonts/lato";
-import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text } from "./src/components/typography/text.component";
-import { SafeArea } from "./src/components/utility/safe-area.component";
-import { Ionicons } from "@expo/vector-icons";
 
-function MapScreen() {
-  return (
-    <SafeArea>
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Mapa!</Text>
-      </View>
-    </SafeArea>
-  );
-}
+import { Navigation } from "./src/infrastructure/navigation";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { AuthenticationContextProvider } from "./src/services/authentication/authentication.context";
+// import * as firebase from "firebaseya";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-function SettingsScreen() {
-  return (
-    <SafeArea>
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Settings!</Text>
-      </View>
-    </SafeArea>
-  );
-}
+// import * as firebase from "firebase";
 
-const Tab = createBottomTabNavigator();
-
-const TAB_ICON = {
-  Restaurace: "restaurant",
-  Restaurace_o: "restaurant-outline",
-  Mapa: "map",
-  Mapa_o: "map-outline",
-  Nastavení: "ios-settings",
-  Nastavení_o: "ios-settings-outline",
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAX-qYgvF9bcGRNi3fSf-dH9I69rfsUels",
+  authDomain: "mealstogo-8da40.firebaseapp.com",
+  projectId: "mealstogo-8da40",
+  storageBucket: "mealstogo-8da40.appspot.com",
+  messagingSenderId: "956043871732",
+  appId: "1:956043871732:web:31d9164b333b11b9a765a1",
 };
 
-const createScreenOptions = ({ route }) => {
-  const iconName = TAB_ICON[route.name + "_o"];
-  const focusedIconName = TAB_ICON[route.name];
-  return {
-    tabBarIcon: ({ focused, size, color }) => (
-      <Ionicons
-        name={focused ? focusedIconName : iconName}
-        size={size}
-        color={color}
-      />
-    ),
-    tabShowLabel: false,
-    headerShown: false,
-  };
-};
+const app = initializeApp(firebaseConfig);
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  //   useEffect(() => {
+  //     const auth = getAuth();
+
+  //     signInWithEmailAndPassword(auth, "janhorak58@gmail.com", "test123")
+  //       .then((userCredentials) => {
+  //         const user = userCredentials.user;
+  //         setIsAuthenticated(true);
+  //         console.log(user);
+  //       })
+  //       .catch((e) => {
+  //         setIsAuthenticated(false);
+  //         console.log(e);
+  //       });
+
+  //     //
+  //   }, []);
+
   let [oswaldLoaded] = useOsawld({
     Oswald_400Regular,
   });
@@ -78,24 +64,11 @@ export default function App() {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <NavigationContainer>
-          <Tab.Navigator
-            screenOptions={createScreenOptions}
-            tabBarOptions={{
-              activeTintColor: "tomato",
-              inactiveTintColor: "gray",
-              showLabel: false,
-            }}
-          >
-            <Tab.Screen name="Restaurace" component={RestaurantsScreen} />
-            <Tab.Screen name="Mapa" component={MapScreen} />
-            <Tab.Screen name="Nastavení" component={SettingsScreen} />
-          </Tab.Navigator>
-        </NavigationContainer>
-        <ExpoStatusBar style="auto" />
+        <AuthenticationContextProvider>
+          <Navigation />
+        </AuthenticationContextProvider>
       </ThemeProvider>
+      <ExpoStatusBar style="auto" />
     </>
   );
 }
-
-const styles = StyleSheet.create({});

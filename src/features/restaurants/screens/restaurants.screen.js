@@ -1,46 +1,78 @@
-import React from "react";
-import { Searchbar } from "react-native-paper";
-import { StatusBar, StyleSheet, SafeAreaView, FlatList } from "react-native";
+import React, { useContext, useState } from "react";
+import { FlatList, ActivityIndicator, TouchableOpacity } from "react-native";
 import { RestaurantInfoCard } from "../components/restaurant-info-card.component";
 import styled from "styled-components/native";
 import { SafeArea } from "../../../components/utility/safe-area.component";
-
-const SearchContainer = styled.View`
-  padding: ${(props) => props.theme.space[3]};
+import { RestaurantsContext } from "../../../services/restaurants/restaurants.context";
+import { Text } from "../../../components/typography/text.component";
+import { Search } from "../components/search.component";
+import { FavouritesContext } from "../../../services/favourites/favourites.context";
+import { FavouritesBar } from "../../../components/favourites/favourites-bar.component";
+import { FadeInView } from "../../../components/animations/fade.animation";
+const AlertText = styled(Text)`
+  text-align: center;
+  margin-top: 250px;
 `;
 
-const RestaurantsList = styled(FlatList).attrs({
+const LoadingContainer = styled.View`
+  position: absolute;
+  left: 50%;
+  top: 45%;
+`;
+
+const Loading = styled(ActivityIndicator)`
+  margin-left: -40px;
+`;
+
+const RestaurantList = styled(FlatList).attrs({
   contentContainerStyle: { padding: 16 },
 })``;
 
-export const RestaurantsScreen = () => {
+export const RestaurantsScreen = ({ navigation }) => {
+  const [showFavourites, setShowFavourites] = useState(false);
+
+  const { restaurants, loading, error } = useContext(RestaurantsContext);
+  const { favourites } = useContext(FavouritesContext);
+
   return (
     <SafeArea>
-      <SearchContainer>
-        <Searchbar />
-      </SearchContainer>
-      <RestaurantsList
-        data={[
-          { name: 1 },
-          { name: 2 },
-          { name: 3 },
-          { name: 4 },
-          { name: 5 },
-          { name: 6 },
-          { name: 7 },
-          { name: 8 },
-          { name: 9 },
-          { name: 10 },
-          { name: 11 },
-          { name: 12 },
-          { name: 13 },
-          { name: 14 },
-        ]}
-        renderItem={() => <RestaurantInfoCard />}
-        keyExtractor={(item) => item.name}
+      <Search
+        setShowFavourites={() => setShowFavourites(!showFavourites)}
+        showFavourites={showFavourites}
       />
+      {showFavourites && (
+        <FavouritesBar
+          favourites={favourites}
+          onNavigate={navigation.navigate}
+        />
+      )}
+      {error ? (
+        <AlertText variant={"error"}>{error}</AlertText>
+      ) : loading ? (
+        <LoadingContainer>
+          <Loading size={80} color={"#303740"} />
+        </LoadingContainer>
+      ) : (
+        <RestaurantList
+          data={restaurants}
+          renderItem={({ item }) => {
+            return (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("RestaurantDetail", {
+                    restaurant: item,
+                  })
+                }
+              >
+                <FadeInView>
+                  <RestaurantInfoCard restaurant={item} />
+                </FadeInView>
+              </TouchableOpacity>
+            );
+          }}
+          keyExtractor={(item) => item.name}
+        />
+      )}
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({});
